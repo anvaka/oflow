@@ -133,7 +133,24 @@ var VideoFlow;
 
 
 /**
- * Allows you to capture optical flow within <video> tag.
+ * A high level interface to capture optical flow from the <video> tag.
+ * The API is symmetrical to webcamFlow.js
+ *
+ * Usage example:
+ *  var flow = new VideoFlow();
+ * 
+ *  // Every time when optical flow is calculated
+ *  // call the passed in callback:
+ *  flow.onCalculated(function (direction) {
+ *      // direction is an object which describes current flow:
+ *      // direction.u, direction.v {floats} general flow vector
+ *      // direction.zones {Array} is a collection of flowZones. 
+ *      //  Each flow zone describes optical flow direction inside of it.
+ *  });
+ *  // Starts capturing the flow from webcamer:
+ *  flow.startCapture();
+ *  // once you are done capturing call
+ *  flow.stopCapture();
  */
 
  
@@ -147,6 +164,7 @@ function VideoFlow(options) {
         width,
         height,
         oldImage,
+        loopId,
         calculator = new FlowCalculator(options.step),
         
         requestAnimFrame = window.requestAnimationFrame       ||
@@ -155,6 +173,9 @@ function VideoFlow(options) {
                            window.oRequestAnimationFrame      ||
                            window.msRequestAnimationFrame     ||
                            function( callback ) { window.setTimeout(callback, 1000 / 60); },
+        cancelAnimFrame =  window.cancelAnimationFrame ||
+                           window.mozCancelAnimationFrame,
+        isCapturing = false,
 
         getCurrentPixels = function () {
             width = video.videoWidth;
@@ -189,14 +210,21 @@ function VideoFlow(options) {
             video = videoSource;
         },
         animloop = function () { 
-            requestAnimFrame(animloop); 
-            calculate();
+            if (isCapturing) {
+                loopId = requestAnimFrame(animloop); 
+                calculate();
+            }
         };
 
     this.startCapture = function (videoSource) {
         // todo: error?
+        isCapturing = true;
         initView(videoSource);
         animloop();
+    };
+    this.stopCapture = function () {
+        cancelAnimFrame(loopId);
+        isCapturing = false;
     };
     this.onCalculated = function (callback) {
         calculatedCallbacks.push(callback);
@@ -237,6 +265,7 @@ return {
 function WebCamFlow() {
     var videoTag,
         isCapturing,
+        localStream,
         calculatedCallbacks = [],
         flowCalculatedCallback,
         videoFlow = new VideoFlow(),
@@ -258,6 +287,7 @@ function WebCamFlow() {
             
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
+                localStream = stream;
                 videoTag.src = window.URL.createObjectURL(stream);
                 if (stream) {
                     videoFlow.startCapture(videoTag);
@@ -284,6 +314,9 @@ function WebCamFlow() {
     };
     this.stopCapture = function() {
         isCapturing = false;
+        videoFlow.stopCapture();
+        if (videoTag) { videoTag.pause(); }
+        if (localStream) { localStream.stop(); }
     };
 }
 exports.WebCamFlow = WebCamFlow;

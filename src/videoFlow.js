@@ -33,6 +33,7 @@ function VideoFlow(options) {
         width,
         height,
         oldImage,
+        loopId,
         calculator = new FlowCalculator(options.step),
         
         requestAnimFrame = window.requestAnimationFrame       ||
@@ -41,6 +42,9 @@ function VideoFlow(options) {
                            window.oRequestAnimationFrame      ||
                            window.msRequestAnimationFrame     ||
                            function( callback ) { window.setTimeout(callback, 1000 / 60); },
+        cancelAnimFrame =  window.cancelAnimationFrame ||
+                           window.mozCancelAnimationFrame,
+        isCapturing = false,
 
         getCurrentPixels = function () {
             width = video.videoWidth;
@@ -75,14 +79,21 @@ function VideoFlow(options) {
             video = videoSource;
         },
         animloop = function () { 
-            requestAnimFrame(animloop); 
-            calculate();
+            if (isCapturing) {
+                loopId = requestAnimFrame(animloop); 
+                calculate();
+            }
         };
 
     this.startCapture = function (videoSource) {
         // todo: error?
+        isCapturing = true;
         initView(videoSource);
         animloop();
+    };
+    this.stopCapture = function () {
+        cancelAnimFrame(loopId);
+        isCapturing = false;
     };
     this.onCalculated = function (callback) {
         calculatedCallbacks.push(callback);
