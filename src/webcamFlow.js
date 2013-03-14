@@ -24,6 +24,7 @@
 function WebCamFlow() {
     var videoTag,
         isCapturing,
+        localStream,
         calculatedCallbacks = [],
         flowCalculatedCallback,
         videoFlow = new VideoFlow(),
@@ -45,6 +46,7 @@ function WebCamFlow() {
             
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
+                localStream = stream;
                 videoTag.src = window.URL.createObjectURL(stream);
                 if (stream) {
                     videoFlow.startCapture(videoTag);
@@ -71,5 +73,8 @@ function WebCamFlow() {
     };
     this.stopCapture = function() {
         isCapturing = false;
+        videoFlow.stopCapture();
+        if (videoTag) { videoTag.pause(); }
+        if (localStream) { localStream.stop(); }
     };
 }
