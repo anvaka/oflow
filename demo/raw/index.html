@@ -1,0 +1,75 @@
+<html>
+<head>
+    <title>Optical flow detection in JavaScript</title>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript" src="../../dist/oflow.js"></script>
+    <script type="text/javascript" src="colors.js"></script>
+    <script type="text/javascript">
+    function main() {
+        var zoneSize = 2,
+            videoElement = document.getElementById('videoOut'),
+            videoWidth = videoElement.videoWidth,
+            videoHeight = videoElement.videoHeight;
+            webCamFlow = new oflow.WebCamFlow(videoElement, zoneSize),
+            canvas = document.getElementById('scene'),
+            ballCanvas = document.getElementById('ballScene'),
+            sceneCtx = canvas.getContext('2d'),
+            ballCtx = ballCanvas.getContext('2d'),
+            sceneWidth = canvas.width,
+            sceneHeight = canvas.height,
+            ballSceneW = ballScene.width,
+            ballSceneH = ballScene.height,
+            ballX = ballSceneW / 2,
+            ballY = ballSceneH / 2;
+
+        ballCtx.fillStyle = '#bada55';
+
+        webCamFlow.onCalculated( function (direciton) {
+            // render zones
+            sceneCtx.clearRect(0, 0, sceneWidth, sceneHeight);
+            for(var i = 0; i < direciton.zones.length; ++i) {
+                var zone = direciton.zones[i];
+                sceneCtx.strokeStyle = getDirectionalColor(zone.u, zone.v);
+                sceneCtx.beginPath();
+                sceneCtx.moveTo(zone.x,zone.y);
+                sceneCtx.lineTo((zone.x - zone.u), zone.y + zone.v);
+                sceneCtx.stroke();
+            }
+            // render ball:
+            ballCtx.clearRect(0, 0, ballSceneW, ballSceneH);
+            ballCtx.beginPath();
+            ballX -= direciton.u * 5;
+            ballY += direciton.v * 5;
+            if (ballX < 0) { ballX = 0; }
+            if (ballX > ballSceneW) { ballX = ballSceneW; }
+            if (ballY < 0) { ballY = 0; }
+            if (ballY > ballSceneH) { ballY = ballSceneH; }
+            ballCtx.arc(ballX, ballY, 10, 0, 2 * Math.PI, false);
+            ballCtx.fillStyle = 'yellow';
+            ballCtx.fill();
+            ballCtx.stroke(); 
+        });
+
+        webCamFlow.startCapture();
+    }
+    </script>
+</head>
+<body onload="main()" style='background-color: black'>
+    <div style='float:left'>
+        <video id='videoOut' width='320px' height='240px'></video><br />
+        <canvas id='ballScene' width='320px' height='240px'></canvas>
+    </div>
+    <canvas id='scene' width='640px' height='480px'></canvas>
+
+<p style='color: white'>
+    Enable your webcamera when prompted (no worries I'm not sending your pictures anywhere :-) ).
+    Move your hands slowly and gradually to control the ball.
+</p>
+    <p>
+        <a href="https://twitter.com/share" class="twitter-share-button" data-via="anvaka">Tweet</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0];if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src="//platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+    </p>
+    <a href="https://github.com/anvaka/oflow"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_white_ffffff.png" alt="Fork me on GitHub"></a>
+</body>
+</html>

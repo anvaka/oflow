@@ -262,7 +262,7 @@ return {
  *  flow.stopCapture();
  */
  
-function WebCamFlow() {
+function WebCamFlow(defaultVideoTag) {
     var videoTag,
         isCapturing,
         localStream,
@@ -282,7 +282,7 @@ function WebCamFlow() {
             });
         },
         initCapture = function() {
-            videoTag = window.document.createElement('video');
+            videoTag = defaultVideoTag || window.document.createElement('video');
             videoTag.setAttribute('autoplay', true);
             
             navigator.getUserMedia({ video: true }, function(stream) {
