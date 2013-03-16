@@ -244,6 +244,10 @@ return {
 
 /**
  * A high level interface to capture optical flow from the web camera.
+ * @param defaultVideoTag {DOMElement} optional reference to <video> tag
+ *   where web camera output should be rendered. If parameter is not
+ *   present a new invisible <video> tag is created.
+ * @param zoneSize {int} optional size of a flow zone in pixels. 8 by default
  *
  * Usage example:
  *  var flow = new WebCamFlow();
@@ -262,18 +266,18 @@ return {
  *  flow.stopCapture();
  */
  
-function WebCamFlow(defaultVideoTag) {
+function WebCamFlow(defaultVideoTag, zoneSize) {
     var videoTag,
         isCapturing,
         localStream,
         calculatedCallbacks = [],
         flowCalculatedCallback,
-        videoFlow = new VideoFlow(),
+        videoFlow = new VideoFlow({step : zoneSize || 8}),
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
                 window.alert('You have denied access to your camera. I cannot do anything.');
             } else { 
-                window.alert('getUserMedia() not supported in your browser.');
+                window.alert('getUserMedia() is not supported in your browser.');
             }
         },
         gotFlow = function(direction) {

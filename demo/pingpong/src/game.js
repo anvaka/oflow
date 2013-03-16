@@ -31,7 +31,7 @@ function Game(scene) {
         if (isOver) {
             return;
         }
-
+        ball.move();
         var outSide = ball.isOut();
         if (this.leftHandle.hit(ball)) {
             cachedPos.x = settings.handleWidth;
@@ -46,7 +46,7 @@ function Game(scene) {
         } else if (outSide) {
             gameOver(outSide);
         }
-        ball.move();
+        
         scene.render(this.leftHandle, this.rightHandle, ball);
     };
     this.isOver = function () {
