@@ -7,7 +7,7 @@
     <script type="text/javascript" src="colors.js"></script>
     <script type="text/javascript">
     function main() {
-        var zoneSize = 2,
+        var zoneSize = 4,
             videoElement = document.getElementById('videoOut'),
             videoWidth = videoElement.videoWidth,
             videoHeight = videoElement.videoHeight;
@@ -65,6 +65,11 @@
 <p style='color: white'>
     Enable your webcamera when prompted (no worries I'm not sending your pictures anywhere :-) ).
     Move your hands slowly and gradually to control the ball.
+</p>
+<p style='color: #bada55'>
+    NOTE: The getUserMedia API is fairly new and might not work in your browser. If you don't see the
+    picture of yourself - something is broken. And the browser did not call the error handler to let you know
+    what's wrong.
 </p>
     <p>
         <a href="https://twitter.com/share" class="twitter-share-button" data-via="anvaka">Tweet</a>
