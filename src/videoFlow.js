@@ -23,18 +23,16 @@
  */
 /* export */
 /* public export */ 
-function VideoFlow(options) {
-    options = options || {};
-
+function VideoFlow(defaultVideoTag, zoneSize) {
     var calculatedCallbacks = [],
         canvas,
-        video,
+        video = defaultVideoTag,
         ctx,
         width,
         height,
         oldImage,
         loopId,
-        calculator = new FlowCalculator(options.step),
+        calculator = new FlowCalculator(zoneSize || 8),
         
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -69,14 +67,12 @@ function VideoFlow(options) {
             oldImage = newImage;
         },
 
-        initView = function (videoSource) {
-            width = videoSource.videoWidth;
-            height = videoSource.videoHeight;
+        initView = function () {
+            width = video.videoWidth;
+            height = video.videoHeight;
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
             ctx = canvas.getContext('2d');
-
-            video = videoSource;
         },
         animloop = function () { 
             if (isCapturing) {
@@ -85,10 +81,16 @@ function VideoFlow(options) {
             }
         };
 
-    this.startCapture = function (videoSource) {
+    if (!defaultVideoTag) {
+        var err = new Error();
+        err.message = "Video tag is required";
+        throw err;
+    }
+
+    this.startCapture = function () {
         // todo: error?
         isCapturing = true;
-        initView(videoSource);
+        initView();
         animloop();
     };
     this.stopCapture = function () {

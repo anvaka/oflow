@@ -34,6 +34,8 @@ flow.stopCapture();
 ```
 To detect flow from ```<video>``` element:
 ```javascript
-var flow = new oflow.VideoFlow();
+var flow = new oflow.VideoFlow(videoDomElement);
 // the remaining API is the same as in the WebCamFlow exapmle above.
 ```
+
+```videoDomElement``` is required argument.
