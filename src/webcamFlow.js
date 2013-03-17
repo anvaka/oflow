@@ -31,7 +31,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
         localStream,
         calculatedCallbacks = [],
         flowCalculatedCallback,
-        videoFlow = new VideoFlow({step : zoneSize || 8}),
+        videoFlow,
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
                 window.alert('You have denied access to your camera. I cannot do anything.');
@@ -45,8 +45,11 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
             });
         },
         initCapture = function() {
-            videoTag = defaultVideoTag || window.document.createElement('video');
-            videoTag.setAttribute('autoplay', true);
+            if (!videoFlow) {
+                videoTag = defaultVideoTag || window.document.createElement('video');
+                videoTag.setAttribute('autoplay', true);
+                videoFlow = new VideoFlow(videoTag, zoneSize);
+            }
             
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
@@ -77,7 +80,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
     };
     this.stopCapture = function() {
         isCapturing = false;
-        videoFlow.stopCapture();
+        if (videoFlow) { videoFlow.stopCapture(); }
         if (videoTag) { videoTag.pause(); }
         if (localStream) { localStream.stop(); }
     };

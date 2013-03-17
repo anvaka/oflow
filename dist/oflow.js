@@ -154,18 +154,16 @@ var VideoFlow;
  */
 
  
-function VideoFlow(options) {
-    options = options || {};
-
+function VideoFlow(defaultVideoTag, zoneSize) {
     var calculatedCallbacks = [],
         canvas,
-        video,
+        video = defaultVideoTag,
         ctx,
         width,
         height,
         oldImage,
         loopId,
-        calculator = new FlowCalculator(options.step),
+        calculator = new FlowCalculator(zoneSize || 8),
         
         requestAnimFrame = window.requestAnimationFrame       ||
                            window.webkitRequestAnimationFrame ||
@@ -200,14 +198,12 @@ function VideoFlow(options) {
             oldImage = newImage;
         },
 
-        initView = function (videoSource) {
-            width = videoSource.videoWidth;
-            height = videoSource.videoHeight;
+        initView = function () {
+            width = video.videoWidth;
+            height = video.videoHeight;
 
             if (!canvas) { canvas = window.document.createElement('canvas'); }
             ctx = canvas.getContext('2d');
-
-            video = videoSource;
         },
         animloop = function () { 
             if (isCapturing) {
@@ -216,10 +212,16 @@ function VideoFlow(options) {
             }
         };
 
-    this.startCapture = function (videoSource) {
+    if (!defaultVideoTag) {
+        var err = new Error();
+        err.message = "Video tag is required";
+        throw err;
+    }
+
+    this.startCapture = function () {
         // todo: error?
         isCapturing = true;
-        initView(videoSource);
+        initView();
         animloop();
     };
     this.stopCapture = function () {
@@ -272,7 +274,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
         localStream,
         calculatedCallbacks = [],
         flowCalculatedCallback,
-        videoFlow = new VideoFlow({step : zoneSize || 8}),
+        videoFlow,
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
                 window.alert('You have denied access to your camera. I cannot do anything.');
@@ -286,8 +288,11 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
             });
         },
         initCapture = function() {
-            videoTag = defaultVideoTag || window.document.createElement('video');
-            videoTag.setAttribute('autoplay', true);
+            if (!videoFlow) {
+                videoTag = defaultVideoTag || window.document.createElement('video');
+                videoTag.setAttribute('autoplay', true);
+                videoFlow = new VideoFlow(videoTag, zoneSize);
+            }
             
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
@@ -318,7 +323,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
     };
     this.stopCapture = function() {
         isCapturing = false;
-        videoFlow.stopCapture();
+        if (videoFlow) { videoFlow.stopCapture(); }
         if (videoTag) { videoTag.pause(); }
         if (localStream) { localStream.stop(); }
     };
