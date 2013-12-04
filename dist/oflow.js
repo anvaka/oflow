@@ -11,7 +11,7 @@
         return factory((root.oflow = {}));
     }
 }(this, function (exports) {
-// import /Users/anvaka/Documents/projects/capturejs/src/flowZone.js
+// import /Users/matt/Documents/Projects/oflow/src/flowZone.js
 var FlowZone;
 (function (__localScope__) {
   FlowZone = __localScope__.FlowZone;
@@ -27,7 +27,7 @@ return {
  FlowZone : FlowZone
 };
 }()));
-// import /Users/anvaka/Documents/projects/capturejs/src/flowCalculator.js
+// import /Users/matt/Documents/Projects/oflow/src/flowCalculator.js
 var FlowCalculator;
 (function (__localScope__) {
   FlowCalculator = __localScope__.FlowCalculator;
@@ -124,7 +124,110 @@ return {
  FlowCalculator : FlowCalculator
 };
 }()));
-// import /Users/anvaka/Documents/projects/capturejs/src/videoFlow.js
+// import /Users/matt/Documents/Projects/oflow/src/canvasFlow.js
+var CanvasFlow;
+(function (__localScope__) {
+  CanvasFlow = __localScope__.CanvasFlow;
+}(function canvasFlow_js() {
+/*global window, FlowCalculator */
+
+
+/**
+ * A high level interface to capture optical flow from the <canvas> tag.
+ * The API is symmetrical to webcamFlow.js
+ *
+ * Usage example:
+ *  var flow = new VideoFlow();
+ * 
+ *  // Every time when optical flow is calculated
+ *  // call the passed in callback:
+ *  flow.onCalculated(function (direction) {
+ *      // direction is an object which describes current flow:
+ *      // direction.u, direction.v {floats} general flow vector
+ *      // direction.zones {Array} is a collection of flowZones. 
+ *      //  Each flow zone describes optical flow direction inside of it.
+ *  });
+ *  // Starts capturing the flow from webcamer:
+ *  flow.startCapture();
+ *  // once you are done capturing call
+ *  flow.stopCapture();
+ */
+
+ 
+function CanvasFlow(defaultCanvasTag, zoneSize) {
+    var calculatedCallbacks = [],
+        canvas = defaultCanvasTag,
+        ctx,
+        width,
+        height,
+        oldImage,
+        loopId,
+        calculator = new FlowCalculator(zoneSize || 8),
+        
+        requestAnimFrame = window.requestAnimationFrame       ||
+                           window.webkitRequestAnimationFrame ||
+                           window.mozRequestAnimationFrame    ||
+                           window.oRequestAnimationFrame      ||
+                           window.msRequestAnimationFrame     ||
+                           function( callback ) { window.setTimeout(callback, 1000 / 60); },
+        cancelAnimFrame =  window.cancelAnimationFrame ||
+                           window.mozCancelAnimationFrame,
+        isCapturing = false,
+
+        getCurrentPixels = function () {
+            return ctx.getImageData(0, 0, width, height).data;
+        },
+        calculate = function () { 
+            var newImage = getCurrentPixels();
+            if (oldImage && newImage) {
+                var zones = calculator.calculate(oldImage, newImage, width, height);
+                calculatedCallbacks.forEach(function (callback) {
+                    callback(zones);
+                });
+            } 
+            oldImage = newImage;
+        },
+
+        initView = function () {
+            width = canvas.width;
+            height = canvas.height;
+            ctx = canvas.getContext('2d');
+        },
+        animloop = function () { 
+            if (isCapturing) {
+                loopId = requestAnimFrame(animloop); 
+                calculate();
+            }
+        };
+
+    if (!defaultCanvasTag) {
+        var err = new Error();
+        err.message = "Video tag is required";
+        throw err;
+    }
+
+    this.startCapture = function () {
+        // todo: error?
+        isCapturing = true;
+        initView();
+        animloop();
+    };
+    this.stopCapture = function () {
+        cancelAnimFrame(loopId);
+        isCapturing = false;
+    };
+    this.onCalculated = function (callback) {
+        calculatedCallbacks.push(callback);
+    };
+    this.getWidth = function () { return width; };
+    this.getHeight = function () { return height; };
+}
+exports.CanvasFlow = CanvasFlow;
+return { 
+ CanvasFlow : CanvasFlow
+};
+}()));
+// import /Users/matt/Documents/Projects/oflow/src/videoFlow.js
 var VideoFlow;
 (function (__localScope__) {
   VideoFlow = __localScope__.VideoFlow;
@@ -239,7 +342,7 @@ return {
  VideoFlow : VideoFlow
 };
 }()));
-// import /Users/anvaka/Documents/projects/capturejs/src/webcamFlow.js
+// import /Users/matt/Documents/Projects/oflow/src/webcamFlow.js
 (function webcamFlow_js() {
 /*global navigator, window, VideoFlow */
 
@@ -330,8 +433,9 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
 }
 exports.WebCamFlow = WebCamFlow;
 }());
-// import /Users/anvaka/Documents/projects/capturejs/src/main.js
+// import /Users/matt/Documents/Projects/oflow/src/main.js
 (function main_js() {
+
 
 
 
