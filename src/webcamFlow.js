@@ -1,5 +1,7 @@
-/*global navigator, window, VideoFlow */
-/* import 'videoFlow.js' */
+/*global navigator, window */
+
+var VideoFlow = require('./videoFlow');
+module.exports = WebCamFlow;
 
 /**
  * A high level interface to capture optical flow from the web camera.
@@ -10,13 +12,13 @@
  *
  * Usage example:
  *  var flow = new WebCamFlow();
- * 
+ *
  *  // Every time when optical flow is calculated
  *  // call the passed in callback:
  *  flow.onCalculated(function (direction) {
  *      // direction is an object which describes current flow:
  *      // direction.u, direction.v {floats} general flow vector
- *      // direction.zones {Array} is a collection of flowZones. 
+ *      // direction.zones {Array} is a collection of flowZones.
  *      //  Each flow zone describes optical flow direction inside of it.
  *  });
  *  // Starts capturing the flow from webcamer:
@@ -24,7 +26,6 @@
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-/* public export */ 
 function WebCamFlow(defaultVideoTag, zoneSize) {
     var videoTag,
         isCapturing,
@@ -35,7 +36,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
                 window.alert('You have denied access to your camera. I cannot do anything.');
-            } else { 
+            } else {
                 window.alert('getUserMedia() is not supported in your browser.');
             }
         },
@@ -50,7 +51,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
                 videoTag.setAttribute('autoplay', true);
                 videoFlow = new VideoFlow(videoTag, zoneSize);
             }
-            
+
             navigator.getUserMedia({ video: true }, function(stream) {
                 isCapturing = true;
                 localStream = stream;
@@ -68,7 +69,7 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
                                  navigator.mozGetUserMedia ||
                                  navigator.msGetUserMedia;
     }
-    
+
     // our public API
     this.startCapture = function () {
         if (!isCapturing) {

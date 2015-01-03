@@ -1,15 +1,15 @@
-/*global FlowZone */
 /*jslint sloppy: true, vars: true, plusplus: true, white: true */
-/* import 'flowZone.js' */
+
+var FlowZone = require('./flowZone');
+
+module.exports = FlowCalculator;
 
 /**
  * The heart of the optical flow detection. Implements Lucas-Kande method:
  * http://en.wikipedia.org/wiki/Lucas%E2%80%93Kanade_method
- * Current implementation is not extremely tolerant to garbage collector. 
- * This could be imporoved...
+ * Current implementation is not extremely tolerant to garbage collector.
+ * This could be improved...
  */
-/* export */
-/* public export */
 function FlowCalculator(step) {
     this.step = step || 8;
 }
