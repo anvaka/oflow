@@ -1,11 +1,12 @@
 /*global window */
 /*jslint plusplus: true, sloppy: true */
 
+module.exports = whenReady;
+
 /**
  * just a little helper method to wait for multiple objects
  * and fire event when all of them indicated they are ready
  */
-/* export */
 function whenReady() {
     var pendingObjects = [].slice.call(arguments),
         wait = pendingObjects.length,

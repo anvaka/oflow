@@ -1,5 +1,8 @@
-/*global document, settings */
+/*global document */
 /*jslint sloppy: true */
+
+var settings = require('../settings.js');
+module.exports = KeyboardController;
 
 /* export */
 /**

@@ -1,14 +1,15 @@
 /*jslint plusplus: true, sloppy: true */
-/*global settings, Geometry */
 
-/* import 'handle.js' */
-/* import 'ball.js' */
-/* import 'settings.js' */
+var Handle = require('./handle.js');
+var Ball = require('./ball.js');
+var settings = require('./settings.js');
+var Geometry = require('./intersect.js');
+
+module.exports = Game;
 
 /**
  * Ping Pong game model
  **/
-/* export */
 function Game(scene) {
     var isOver = false,
         overCallbacks = [],
@@ -46,7 +47,7 @@ function Game(scene) {
         } else if (outSide) {
             gameOver(outSide);
         }
-        
+
         scene.render(this.leftHandle, this.rightHandle, ball);
     };
     this.isOver = function () {

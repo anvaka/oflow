@@ -1,18 +1,15 @@
-/*global Scene, Game, EventLoop, ComputerController, WebCamController, whenReady*/
-/* import 'utils.js' */
-/* import 'scene.js' */
-/* import 'game.js' */
-/* import 'eventLoop.js' */
-/* import 'controllers/computerController.js' */
-/* import 'controllers/webcamController.js' */
-/* import 'controllers/keyboardController.js' */
+var Scene = require('./scene.js');
+var Game = require('./game.js');
+var EventLoop = require('./eventLoop.js');
+var ComputerController = require('./controllers/computerController.js');
+var WebCamController = require('./controllers/webcamController.js');
+var whenReady = require('./utils.js');
 
 var UP_ARROW = 38, DOWN_ARROW = 40, KEY_W = 87, KEY_S = 83,
     scene = new Scene(document.getElementById('scene')),
     game = new Game(scene),
     eventLoop = new EventLoop(),
     leftController = new ComputerController(game.ball),
-// rightController = new KeyboardController(UP_ARROW, DOWN_ARROW),
     rightController = new WebCamController();
 
 
@@ -23,6 +20,7 @@ eventLoop.onRender(function renderFrame() {
         game.step();
     }
 });
+
 game.onOver(function() {
     leftController.dismount();
     rightController.dismount();

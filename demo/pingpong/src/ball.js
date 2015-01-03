@@ -1,6 +1,7 @@
 /*jslint sloppy: true */
 
-/* export Ball */
+module.exports = Ball;
+
 /**
  * Represents a ball object on the scene
  */

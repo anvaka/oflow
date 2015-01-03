@@ -1,15 +1,17 @@
 /* namespace Geometry */
 
-/*jslint sloppy: true */
+module.exports = {
+  Point: Point,
+  Intersect: Intersect
+};
 
-/* export */
 function Point() {
     this.x = this.y = 0;
 }
+
 Point.prototype = { x: 0, y: 0 };
 
 
-/* export */
 /**
  * Quick algorithm to detect intersection of two line segments. 
  * Originally published in Graphics GEM:

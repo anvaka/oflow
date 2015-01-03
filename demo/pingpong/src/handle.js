@@ -1,10 +1,10 @@
-/*global settings, Geometry */
 /*jslint sloppy: true */
 
-/* import 'intersect.js' */
-/* import 'settings.js' */
+var settings = require('./settings');
+var Geometry = require('./intersect');
 
-/* export */
+module.exports = Handle;
+
 /**
  * Represents a single ping pong handle either left or right 
  **/

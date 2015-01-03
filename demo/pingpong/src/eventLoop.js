@@ -1,7 +1,7 @@
 /*jslint sloppy: true, vars: true */
 /*global requestAnimationFrame, cancelAnimationFrame */
 
-/* export */
+module.exports = EventLoop;
 /**
  * A simple event loop class, which fires onRender events on each animation frame
  */

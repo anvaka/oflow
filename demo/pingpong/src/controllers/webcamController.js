@@ -1,9 +1,11 @@
 /*jslint sloppy: true */
 
+module.exports = WebCamController;
+
+var oflow = require('../../../../src/main.js');
 /**
  * Controls a handle via optical flow detection from the webcam.
  */
-/* export */
 function WebCamController() {
     var flow = new oflow.WebCamFlow(),
         readyCallback,

@@ -1,7 +1,8 @@
-/*global document, settings */
+/*global document */
 /*jslint sloppy: true */
 
-/* export */
+module.exports = ComputerController;
+
 /**
  * Controls a handle by computer (naive computer vs player)
  */

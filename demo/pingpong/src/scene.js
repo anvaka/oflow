@@ -1,9 +1,9 @@
 /*jslint sloppy: true */
-/*global settings */
 
-/* import 'settings.js' */
+var settings = require("./settings.js");
 
-/* export */
+module.exports = Scene;
+
 /**
  * Renders game to the canvas.
  */
