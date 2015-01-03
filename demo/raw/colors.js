@@ -32,6 +32,6 @@ function convertHsvToRgb(h, s, v) {
 }
 
 function getDirectionalColor(x, y) {
-    var hue = Math.atan2(y, x) * toDegree + 360;
+    var hue = (Math.atan2(y, x) * toDegree + 360) % 360;
     return convertHsvToRgb(hue, 1, 1);
 }
