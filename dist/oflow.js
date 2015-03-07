@@ -323,6 +323,9 @@ module.exports = WebCamFlow;
  *   where web camera output should be rendered. If parameter is not
  *   present a new invisible <video> tag is created.
  * @param zoneSize {int} optional size of a flow zone in pixels. 8 by default
+ * @param cameraFacing {string} optional direction camera is facing (either 
+ * 'user' or 'environment') used to give preference to a particlar mobile 
+ * camera. If matching camera is not found, any available one will be used.
  *
  * Usage example:
  *  var flow = new WebCamFlow();
@@ -340,7 +343,7 @@ module.exports = WebCamFlow;
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-function WebCamFlow(defaultVideoTag, zoneSize) {
+function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
     var videoTag,
         isCapturing,
         localStream,
@@ -366,15 +369,30 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
                 videoFlow = new VideoFlow(videoTag, zoneSize);
             }
 
-            navigator.getUserMedia({ video: true }, function(stream) {
-                isCapturing = true;
-                localStream = stream;
-                videoTag.src = window.URL.createObjectURL(stream);
-                if (stream) {
-                    videoFlow.startCapture(videoTag);
-                    videoFlow.onCalculated(gotFlow);
+            window.MediaStreamTrack.getSources(function(sourceInfos) {
+                for (var i = 0; i < sourceInfos.length; i++) {
+                    if (sourceInfos[i].kind === 'video'){
+                        selectedVideoSource = sourceInfos[i].id;
+                        // if camera facing requested direction is found, stop search
+                        if (sourceInfos[i].facing === cameraFacing) {
+                            break;
+                        }
+                    }
                 }
-            }, onWebCamFail);
+
+                desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
+
+                navigator.getUserMedia({ video: desiredDevice }, function(stream) {
+                    isCapturing = true;
+                    localStream = stream;
+                    videoTag.src = window.URL.createObjectURL(stream);
+                    if (stream) {
+                        videoFlow.startCapture(videoTag);
+                        videoFlow.onCalculated(gotFlow);
+                    }
+                }, onWebCamFail);
+            });
+
         };
 
     if (!navigator.getUserMedia) {
