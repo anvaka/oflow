@@ -12,6 +12,7 @@
     "url": "https://github.com/anvaka/oflow/issues"
   },
   "scripts": {
-    "build": "browserify -s oflow src/main.js > dist/oflow.js"
+    "build": "browserify -s oflow src/main.js > dist/oflow.js",
+    "demo": "browserify demo/pingpong/src/main.js > demo/pingpong/build/bundle.js"
   }
 }

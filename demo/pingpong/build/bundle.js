@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*jslint sloppy: true */
 
 module.exports = Ball;
@@ -657,8 +657,8 @@ function CanvasFlow(defaultCanvasTag, zoneSize) {
 }
 
 },{"./flowCalculator.js":14}],14:[function(require,module,exports){
-module.exports=require(12)
-},{"./flowZone":15}],15:[function(require,module,exports){
+arguments[4][12][0].apply(exports,arguments)
+},{"./flowZone":15,"dup":12}],15:[function(require,module,exports){
 module.exports = FlowZone;
 
 function FlowZone(x, y, u, v) {
@@ -796,6 +796,9 @@ module.exports = WebCamFlow;
  *   where web camera output should be rendered. If parameter is not
  *   present a new invisible <video> tag is created.
  * @param zoneSize {int} optional size of a flow zone in pixels. 8 by default
+ * @param cameraFacing {string} optional direction camera is facing (either 
+ * 'user' or 'environment') used to give preference to a particlar mobile 
+ * camera. If matching camera is not found, any available one will be used.
  *
  * Usage example:
  *  var flow = new WebCamFlow();
@@ -813,7 +816,7 @@ module.exports = WebCamFlow;
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-function WebCamFlow(defaultVideoTag, zoneSize) {
+function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
     var videoTag,
         isCapturing,
         localStream,
@@ -833,13 +836,26 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
             });
         },
         initCapture = function() {
-            if (!videoFlow) {
-                videoTag = defaultVideoTag || window.document.createElement('video');
-                videoTag.setAttribute('autoplay', true);
-                videoFlow = new VideoFlow(videoTag, zoneSize);
+        if (!videoFlow) {
+            videoTag = defaultVideoTag || window.document.createElement('video');
+            videoTag.setAttribute('autoplay', true);
+            videoFlow = new VideoFlow(videoTag, zoneSize);
+        }
+
+        window.MediaStreamTrack.getSources(function(sourceInfos) {
+            for (var i = 0; i < sourceInfos.length; i++) {
+                if (sourceInfos[i].kind === 'video'){
+                    selectedVideoSource = sourceInfos[i].id;
+                    // if camera facing requested direction is found, stop search
+                    if (sourceInfos[i].facing === cameraFacing) {
+                        break;
+                    }
+                }
             }
 
-            navigator.getUserMedia({ video: true }, function(stream) {
+            desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
+
+            navigator.getUserMedia({ video: desiredDevice }, function(stream) {
                 isCapturing = true;
                 localStream = stream;
                 videoTag.src = window.URL.createObjectURL(stream);
@@ -848,7 +864,9 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
                     videoFlow.onCalculated(gotFlow);
                 }
             }, onWebCamFail);
-        };
+        });
+
+    };
 
     if (!navigator.getUserMedia) {
         navigator.getUserMedia = navigator.getUserMedia ||
@@ -874,4 +892,4 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
     };
 }
 
-},{"./videoFlow":17}]},{},[8])
+},{"./videoFlow":17}]},{},[8]);

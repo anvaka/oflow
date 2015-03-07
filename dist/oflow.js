@@ -1,7 +1,7 @@
-!function(e){if("object"==typeof exports&&"undefined"!=typeof module)module.exports=e();else if("function"==typeof define&&define.amd)define([],e);else{var f;"undefined"!=typeof window?f=window:"undefined"!=typeof global?f=global:"undefined"!=typeof self&&(f=self),f.oflow=e()}}(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
+(function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.oflow = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*jslint sloppy: true, vars: true, plusplus: true, white: true */
 
-var FlowZone = _dereq_('./flowZone');
+var FlowZone = require('./flowZone');
 
 module.exports = FlowCalculator;
 
@@ -87,10 +87,10 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     };
 };
 
-},{"./flowZone":4}],2:[function(_dereq_,module,exports){
+},{"./flowZone":4}],2:[function(require,module,exports){
 /*global window,  */
 
-var FlowCalculator = _dereq_('./flowCalculator.js');
+var FlowCalculator = require('./flowCalculator.js');
 
 module.exports = CanvasFlow;
 
@@ -183,9 +183,9 @@ function CanvasFlow(defaultCanvasTag, zoneSize) {
     this.getHeight = function () { return height; };
 }
 
-},{"./flowCalculator.js":3}],3:[function(_dereq_,module,exports){
-module.exports=_dereq_(1)
-},{"./flowZone":4}],4:[function(_dereq_,module,exports){
+},{"./flowCalculator.js":3}],3:[function(require,module,exports){
+arguments[4][1][0].apply(exports,arguments)
+},{"./flowZone":4,"dup":1}],4:[function(require,module,exports){
 module.exports = FlowZone;
 
 function FlowZone(x, y, u, v) {
@@ -195,19 +195,19 @@ function FlowZone(x, y, u, v) {
     this.v = v;
 }
 
-},{}],5:[function(_dereq_,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = {
-  WebCamFlow: _dereq_('./webcamFlow'),
-  VideoFlow: _dereq_('./videoFlow'),
-  CanvasFlow: _dereq_('./canvasFlow'),
-  FlowZone: _dereq_('./flowZone'),
-  FlowCalculator: _dereq_('./FlowCalculator')
+  WebCamFlow: require('./webcamFlow'),
+  VideoFlow: require('./videoFlow'),
+  CanvasFlow: require('./canvasFlow'),
+  FlowZone: require('./flowZone'),
+  FlowCalculator: require('./FlowCalculator')
 };
 
-},{"./FlowCalculator":1,"./canvasFlow":2,"./flowZone":4,"./videoFlow":6,"./webcamFlow":7}],6:[function(_dereq_,module,exports){
+},{"./FlowCalculator":1,"./canvasFlow":2,"./flowZone":4,"./videoFlow":6,"./webcamFlow":7}],6:[function(require,module,exports){
 /*global window */
 
-var FlowCalculator = _dereq_('./flowCalculator');
+var FlowCalculator = require('./flowCalculator');
 module.exports = VideoFlow;
 
 /**
@@ -311,10 +311,10 @@ function VideoFlow(defaultVideoTag, zoneSize) {
     this.getHeight = function () { return height; };
 }
 
-},{"./flowCalculator":3}],7:[function(_dereq_,module,exports){
+},{"./flowCalculator":3}],7:[function(require,module,exports){
 /*global navigator, window */
 
-var VideoFlow = _dereq_('./videoFlow');
+var VideoFlow = require('./videoFlow');
 module.exports = WebCamFlow;
 
 /**
@@ -363,37 +363,37 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
             });
         },
         initCapture = function() {
-            if (!videoFlow) {
-                videoTag = defaultVideoTag || window.document.createElement('video');
-                videoTag.setAttribute('autoplay', true);
-                videoFlow = new VideoFlow(videoTag, zoneSize);
-            }
+        if (!videoFlow) {
+            videoTag = defaultVideoTag || window.document.createElement('video');
+            videoTag.setAttribute('autoplay', true);
+            videoFlow = new VideoFlow(videoTag, zoneSize);
+        }
 
-            window.MediaStreamTrack.getSources(function(sourceInfos) {
-                for (var i = 0; i < sourceInfos.length; i++) {
-                    if (sourceInfos[i].kind === 'video'){
-                        selectedVideoSource = sourceInfos[i].id;
-                        // if camera facing requested direction is found, stop search
-                        if (sourceInfos[i].facing === cameraFacing) {
-                            break;
-                        }
+        window.MediaStreamTrack.getSources(function(sourceInfos) {
+            for (var i = 0; i < sourceInfos.length; i++) {
+                if (sourceInfos[i].kind === 'video'){
+                    selectedVideoSource = sourceInfos[i].id;
+                    // if camera facing requested direction is found, stop search
+                    if (sourceInfos[i].facing === cameraFacing) {
+                        break;
                     }
                 }
+            }
 
-                desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
+            desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
 
-                navigator.getUserMedia({ video: desiredDevice }, function(stream) {
-                    isCapturing = true;
-                    localStream = stream;
-                    videoTag.src = window.URL.createObjectURL(stream);
-                    if (stream) {
-                        videoFlow.startCapture(videoTag);
-                        videoFlow.onCalculated(gotFlow);
-                    }
-                }, onWebCamFail);
-            });
+            navigator.getUserMedia({ video: desiredDevice }, function(stream) {
+                isCapturing = true;
+                localStream = stream;
+                videoTag.src = window.URL.createObjectURL(stream);
+                if (stream) {
+                    videoFlow.startCapture(videoTag);
+                    videoFlow.onCalculated(gotFlow);
+                }
+            }, onWebCamFail);
+        });
 
-        };
+    };
 
     if (!navigator.getUserMedia) {
         navigator.getUserMedia = navigator.getUserMedia ||
@@ -419,6 +419,5 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
     };
 }
 
-},{"./videoFlow":6}]},{},[5])
-(5)
+},{"./videoFlow":6}]},{},[5])(5)
 });
