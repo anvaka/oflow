@@ -9,8 +9,8 @@ module.exports = WebCamFlow;
  *   where web camera output should be rendered. If parameter is not
  *   present a new invisible <video> tag is created.
  * @param zoneSize {int} optional size of a flow zone in pixels. 8 by default
- * @param cameraFacing {string} optional direction camera is facing (either 
- * 'user' or 'environment') used to give preference to a particlar mobile 
+ * @param cameraFacing {string} optional direction camera is facing (either
+ * 'user' or 'environment') used to give preference to a particular mobile
  * camera. If matching camera is not found, any available one will be used.
  *
  * Usage example:
@@ -24,7 +24,7 @@ module.exports = WebCamFlow;
  *      // direction.zones {Array} is a collection of flowZones.
  *      //  Each flow zone describes optical flow direction inside of it.
  *  });
- *  // Starts capturing the flow from webcamer:
+ *  // Starts capturing the flow from webcamera:
  *  flow.startCapture();
  *  // once you are done capturing call
  *  flow.stopCapture();

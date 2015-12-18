@@ -18,7 +18,7 @@ module.exports = VideoFlow;
  *      // direction.zones {Array} is a collection of flowZones.
  *      //  Each flow zone describes optical flow direction inside of it.
  *  });
- *  // Starts capturing the flow from webcamer:
+ *  // Starts capturing the flow from webcamera:
  *  flow.startCapture();
  *  // once you are done capturing call
  *  flow.stopCapture();

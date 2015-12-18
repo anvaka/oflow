@@ -13,7 +13,7 @@ Point.prototype = { x: 0, y: 0 };
 
 
 /**
- * Quick algorithm to detect intersection of two line segments. 
+ * Quick algorithm to detect intersection of two line segments.
  * Originally published in Graphics GEM:
  * http://www.opensource.apple.com/source/graphviz/graphviz-498/graphviz/dynagraph/common/xlines.c
  **/
