@@ -3,5 +3,5 @@ module.exports = {
   VideoFlow: require('./videoFlow'),
   CanvasFlow: require('./canvasFlow'),
   FlowZone: require('./flowZone'),
-  FlowCalculator: require('./FlowCalculator')
+  FlowCalculator: require('./flowCalculator')
 };
