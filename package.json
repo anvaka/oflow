@@ -14,5 +14,8 @@
   "scripts": {
     "build": "browserify -s oflow src/main.js > dist/oflow.js",
     "demo": "browserify demo/pingpong/src/main.js > demo/pingpong/build/bundle.js"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1"
   }
 }
