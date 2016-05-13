@@ -25,7 +25,7 @@ function convertHsvToRgb(h, s, v) {
             case 4: return fromArgb(255, c, a, d);
             case 5: return fromArgb(255, d, a, b);
             default: return fromArgb(0, 0, 0, 0);
-        } 
+        }
     }
     d = v * 255;
     return fromArgb(255, d, d, d);

@@ -1,6 +1,6 @@
 {
   "name": "oflow",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Simple optical flow detection based on Lucas-Kande method",
   "main": "./src/main.js",
   "repository": {
@@ -12,6 +12,10 @@
     "url": "https://github.com/anvaka/oflow/issues"
   },
   "scripts": {
-    "build": "browserify -s oflow src/main.js > dist/oflow.js"
+    "build": "browserify -s oflow src/main.js > dist/oflow.js",
+    "demo": "browserify demo/pingpong/src/main.js > demo/pingpong/build/bundle.js"
+  },
+  "devDependencies": {
+    "browserify": "^13.0.1"
   }
 }

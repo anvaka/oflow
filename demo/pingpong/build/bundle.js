@@ -1,4 +1,4 @@
-(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);throw new Error("Cannot find module '"+o+"'")}var f=n[o]={exports:{}};t[o][0].call(f.exports,function(e){var n=t[o][1][e];return s(n?n:e)},f,f.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*jslint sloppy: true */
 
 module.exports = Ball;
@@ -105,7 +105,7 @@ function WebCamController() {
     };
 }
 
-},{"../../../../src/main.js":16}],4:[function(require,module,exports){
+},{"../../../../src/main.js":15}],4:[function(require,module,exports){
 /*jslint sloppy: true, vars: true */
 /*global requestAnimationFrame, cancelAnimationFrame */
 
@@ -211,7 +211,7 @@ var Geometry = require('./intersect');
 module.exports = Handle;
 
 /**
- * Represents a single ping pong handle either left or right 
+ * Represents a single ping pong handle either left or right
  **/
 function Handle(isLeft, scene) {
     this.height = settings.handleHeight;
@@ -253,7 +253,7 @@ Point.prototype = { x: 0, y: 0 };
 
 
 /**
- * Quick algorithm to detect intersection of two line segments. 
+ * Quick algorithm to detect intersection of two line segments.
  * Originally published in Graphics GEM:
  * http://www.opensource.apple.com/source/graphviz/graphviz-498/graphviz/dynagraph/common/xlines.c
  **/
@@ -472,6 +472,102 @@ function whenReady() {
 }
 
 },{}],12:[function(require,module,exports){
+/*global window,  */
+
+var FlowCalculator = require('./flowCalculator.js');
+
+module.exports = CanvasFlow;
+
+/**
+ * A high level interface to capture optical flow from the <canvas> tag.
+ * The API is symmetrical to webcamFlow.js
+ *
+ * Usage example:
+ *  var flow = new VideoFlow();
+ *
+ *  // Every time when optical flow is calculated
+ *  // call the passed in callback:
+ *  flow.onCalculated(function (direction) {
+ *      // direction is an object which describes current flow:
+ *      // direction.u, direction.v {floats} general flow vector
+ *      // direction.zones {Array} is a collection of flowZones.
+ *      //  Each flow zone describes optical flow direction inside of it.
+ *  });
+ *  // Starts capturing the flow from webcamera:
+ *  flow.startCapture();
+ *  // once you are done capturing call
+ *  flow.stopCapture();
+ */
+function CanvasFlow(defaultCanvasTag, zoneSize) {
+    var calculatedCallbacks = [],
+        canvas = defaultCanvasTag,
+        ctx,
+        width,
+        height,
+        oldImage,
+        loopId,
+        calculator = new FlowCalculator(zoneSize || 8),
+
+        requestAnimFrame = window.requestAnimationFrame       ||
+                           window.webkitRequestAnimationFrame ||
+                           window.mozRequestAnimationFrame    ||
+                           window.oRequestAnimationFrame      ||
+                           window.msRequestAnimationFrame     ||
+                           function( callback ) { window.setTimeout(callback, 1000 / 60); },
+        cancelAnimFrame =  window.cancelAnimationFrame ||
+                           window.mozCancelAnimationFrame,
+        isCapturing = false,
+
+        getCurrentPixels = function () {
+            return ctx.getImageData(0, 0, width, height).data;
+        },
+        calculate = function () {
+            var newImage = getCurrentPixels();
+            if (oldImage && newImage) {
+                var zones = calculator.calculate(oldImage, newImage, width, height);
+                calculatedCallbacks.forEach(function (callback) {
+                    callback(zones);
+                });
+            }
+            oldImage = newImage;
+        },
+
+        initView = function () {
+            width = canvas.width;
+            height = canvas.height;
+            ctx = canvas.getContext('2d');
+        },
+        animloop = function () {
+            if (isCapturing) {
+                loopId = requestAnimFrame(animloop);
+                calculate();
+            }
+        };
+
+    if (!defaultCanvasTag) {
+        var err = new Error();
+        err.message = "Video tag is required";
+        throw err;
+    }
+
+    this.startCapture = function () {
+        // todo: error?
+        isCapturing = true;
+        initView();
+        animloop();
+    };
+    this.stopCapture = function () {
+        cancelAnimFrame(loopId);
+        isCapturing = false;
+    };
+    this.onCalculated = function (callback) {
+        calculatedCallbacks.push(callback);
+    };
+    this.getWidth = function () { return width; };
+    this.getHeight = function () { return height; };
+}
+
+},{"./flowCalculator.js":13}],13:[function(require,module,exports){
 /*jslint sloppy: true, vars: true, plusplus: true, white: true */
 
 var FlowZone = require('./flowZone');
@@ -560,105 +656,7 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
     };
 };
 
-},{"./flowZone":15}],13:[function(require,module,exports){
-/*global window,  */
-
-var FlowCalculator = require('./flowCalculator.js');
-
-module.exports = CanvasFlow;
-
-/**
- * A high level interface to capture optical flow from the <canvas> tag.
- * The API is symmetrical to webcamFlow.js
- *
- * Usage example:
- *  var flow = new VideoFlow();
- *
- *  // Every time when optical flow is calculated
- *  // call the passed in callback:
- *  flow.onCalculated(function (direction) {
- *      // direction is an object which describes current flow:
- *      // direction.u, direction.v {floats} general flow vector
- *      // direction.zones {Array} is a collection of flowZones.
- *      //  Each flow zone describes optical flow direction inside of it.
- *  });
- *  // Starts capturing the flow from webcamer:
- *  flow.startCapture();
- *  // once you are done capturing call
- *  flow.stopCapture();
- */
-function CanvasFlow(defaultCanvasTag, zoneSize) {
-    var calculatedCallbacks = [],
-        canvas = defaultCanvasTag,
-        ctx,
-        width,
-        height,
-        oldImage,
-        loopId,
-        calculator = new FlowCalculator(zoneSize || 8),
-
-        requestAnimFrame = window.requestAnimationFrame       ||
-                           window.webkitRequestAnimationFrame ||
-                           window.mozRequestAnimationFrame    ||
-                           window.oRequestAnimationFrame      ||
-                           window.msRequestAnimationFrame     ||
-                           function( callback ) { window.setTimeout(callback, 1000 / 60); },
-        cancelAnimFrame =  window.cancelAnimationFrame ||
-                           window.mozCancelAnimationFrame,
-        isCapturing = false,
-
-        getCurrentPixels = function () {
-            return ctx.getImageData(0, 0, width, height).data;
-        },
-        calculate = function () {
-            var newImage = getCurrentPixels();
-            if (oldImage && newImage) {
-                var zones = calculator.calculate(oldImage, newImage, width, height);
-                calculatedCallbacks.forEach(function (callback) {
-                    callback(zones);
-                });
-            }
-            oldImage = newImage;
-        },
-
-        initView = function () {
-            width = canvas.width;
-            height = canvas.height;
-            ctx = canvas.getContext('2d');
-        },
-        animloop = function () {
-            if (isCapturing) {
-                loopId = requestAnimFrame(animloop);
-                calculate();
-            }
-        };
-
-    if (!defaultCanvasTag) {
-        var err = new Error();
-        err.message = "Video tag is required";
-        throw err;
-    }
-
-    this.startCapture = function () {
-        // todo: error?
-        isCapturing = true;
-        initView();
-        animloop();
-    };
-    this.stopCapture = function () {
-        cancelAnimFrame(loopId);
-        isCapturing = false;
-    };
-    this.onCalculated = function (callback) {
-        calculatedCallbacks.push(callback);
-    };
-    this.getWidth = function () { return width; };
-    this.getHeight = function () { return height; };
-}
-
-},{"./flowCalculator.js":14}],14:[function(require,module,exports){
-module.exports=require(12)
-},{"./flowZone":15}],15:[function(require,module,exports){
+},{"./flowZone":14}],14:[function(require,module,exports){
 module.exports = FlowZone;
 
 function FlowZone(x, y, u, v) {
@@ -668,16 +666,16 @@ function FlowZone(x, y, u, v) {
     this.v = v;
 }
 
-},{}],16:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 module.exports = {
   WebCamFlow: require('./webcamFlow'),
   VideoFlow: require('./videoFlow'),
   CanvasFlow: require('./canvasFlow'),
   FlowZone: require('./flowZone'),
-  FlowCalculator: require('./FlowCalculator')
+  FlowCalculator: require('./flowCalculator')
 };
 
-},{"./FlowCalculator":12,"./canvasFlow":13,"./flowZone":15,"./videoFlow":17,"./webcamFlow":18}],17:[function(require,module,exports){
+},{"./canvasFlow":12,"./flowCalculator":13,"./flowZone":14,"./videoFlow":16,"./webcamFlow":17}],16:[function(require,module,exports){
 /*global window */
 
 var FlowCalculator = require('./flowCalculator');
@@ -698,7 +696,7 @@ module.exports = VideoFlow;
  *      // direction.zones {Array} is a collection of flowZones.
  *      //  Each flow zone describes optical flow direction inside of it.
  *  });
- *  // Starts capturing the flow from webcamer:
+ *  // Starts capturing the flow from webcamera:
  *  flow.startCapture();
  *  // once you are done capturing call
  *  flow.stopCapture();
@@ -784,7 +782,7 @@ function VideoFlow(defaultVideoTag, zoneSize) {
     this.getHeight = function () { return height; };
 }
 
-},{"./flowCalculator":14}],18:[function(require,module,exports){
+},{"./flowCalculator":13}],17:[function(require,module,exports){
 /*global navigator, window */
 
 var VideoFlow = require('./videoFlow');
@@ -796,6 +794,9 @@ module.exports = WebCamFlow;
  *   where web camera output should be rendered. If parameter is not
  *   present a new invisible <video> tag is created.
  * @param zoneSize {int} optional size of a flow zone in pixels. 8 by default
+ * @param cameraFacing {string} optional direction camera is facing (either
+ * 'user' or 'environment') used to give preference to a particular mobile
+ * camera. If matching camera is not found, any available one will be used.
  *
  * Usage example:
  *  var flow = new WebCamFlow();
@@ -808,12 +809,12 @@ module.exports = WebCamFlow;
  *      // direction.zones {Array} is a collection of flowZones.
  *      //  Each flow zone describes optical flow direction inside of it.
  *  });
- *  // Starts capturing the flow from webcamer:
+ *  // Starts capturing the flow from webcamera:
  *  flow.startCapture();
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-function WebCamFlow(defaultVideoTag, zoneSize) {
+function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
     var videoTag,
         isCapturing,
         localStream,
@@ -833,22 +834,66 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
             });
         },
         initCapture = function() {
-            if (!videoFlow) {
-                videoTag = defaultVideoTag || window.document.createElement('video');
-                videoTag.setAttribute('autoplay', true);
-                videoFlow = new VideoFlow(videoTag, zoneSize);
-            }
+        if (!videoFlow) {
+            videoTag = defaultVideoTag || window.document.createElement('video');
+            videoTag.setAttribute('autoplay', true);
+            videoFlow = new VideoFlow(videoTag, zoneSize);
+        }
 
-            navigator.getUserMedia({ video: true }, function(stream) {
-                isCapturing = true;
-                localStream = stream;
-                videoTag.src = window.URL.createObjectURL(stream);
-                if (stream) {
-                    videoFlow.startCapture(videoTag);
-                    videoFlow.onCalculated(gotFlow);
+
+        
+
+        if (window.MediaStreamTrack.getSources) {
+            window.MediaStreamTrack.getSources(function(sourceInfos) {
+                for (var i = 0; i < sourceInfos.length; i++) {
+                    if (sourceInfos[i].kind === 'video'){
+                        selectedVideoSource = sourceInfos[i].id;
+                        // if camera facing requested direction is found, stop search
+                        if (sourceInfos[i].facing === cameraFacing) {
+                            break;
+                        }
+                    }
                 }
-            }, onWebCamFail);
-        };
+
+                desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
+
+                navigator.getUserMedia({ video: desiredDevice }, function(stream) {
+                    isCapturing = true;
+                    localStream = stream;
+                    videoTag.src = window.URL.createObjectURL(stream);
+                    if (stream) {
+                        videoFlow.startCapture(videoTag);
+                        videoFlow.onCalculated(gotFlow);
+                    }
+                }, onWebCamFail);
+            });
+        } else if(navigator.mediaDevices.enumerateDevices) {
+            navigator.mediaDevices.enumerateDevices().then(
+                function(sourceInfos){
+                    for (var i = 0; i < sourceInfos.length; i++) {
+                        if(sourceInfos[i].kind == "videoinput"){
+                            selectedVideoSource = sourceInfos[i].deviceId;
+                        }
+                    }
+                    
+                    desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
+
+                    navigator.getUserMedia({ video: desiredDevice }, function(stream) {
+                        isCapturing = true;
+                        localStream = stream;
+                        videoTag.src = window.URL.createObjectURL(stream);
+                        if (stream) {
+                            videoFlow.startCapture(videoTag);
+                            videoFlow.onCalculated(gotFlow);
+                        }
+                    }, onWebCamFail);
+                }
+            );
+        }
+
+
+
+    };
 
     if (!navigator.getUserMedia) {
         navigator.getUserMedia = navigator.getUserMedia ||
@@ -874,4 +919,4 @@ function WebCamFlow(defaultVideoTag, zoneSize) {
     };
 }
 
-},{"./videoFlow":17}]},{},[8])
+},{"./videoFlow":16}]},{},[8]);

@@ -6,7 +6,7 @@ var Geometry = require('./intersect');
 module.exports = Handle;
 
 /**
- * Represents a single ping pong handle either left or right 
+ * Represents a single ping pong handle either left or right
  **/
 function Handle(isLeft, scene) {
     this.height = settings.handleHeight;
