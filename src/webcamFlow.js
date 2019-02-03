@@ -75,7 +75,11 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                 navigator.getUserMedia({ video: desiredDevice }, function(stream) {
                     isCapturing = true;
                     localStream = stream;
-                    videoTag.src = window.URL.createObjectURL(stream);
+                    if ("srcObject" in videoTag) {
+                        videoTag.srcObject = stream;
+                    } else {
+                        videoTag.src = window.URL.createObjectURL(stream);
+                    }
                     if (stream) {
                         videoFlow.startCapture(videoTag);
                         videoFlow.onCalculated(gotFlow);
@@ -96,7 +100,11 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                     navigator.getUserMedia({ video: desiredDevice }, function(stream) {
                         isCapturing = true;
                         localStream = stream;
-                        videoTag.src = window.URL.createObjectURL(stream);
+                        if ("srcObject" in videoTag) {
+                            videoTag.srcObject = stream;
+                        } else {
+                            videoTag.src = window.URL.createObjectURL(stream);
+                        }
                         if (stream) {
                             videoFlow.startCapture(videoTag);
                             videoFlow.onCalculated(gotFlow);
