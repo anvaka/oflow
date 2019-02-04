@@ -34,7 +34,8 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
         isCapturing,
         localStream,
         calculatedCallbacks = [],
-        flowCalculatedCallback,
+        selectedVideoSource,
+        desiredDevice,
         videoFlow,
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
@@ -55,9 +56,6 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
             videoFlow = new VideoFlow(videoTag, zoneSize);
         }
 
-
-        
-
         if (window.MediaStreamTrack.getSources) {
             window.MediaStreamTrack.getSources(function(sourceInfos) {
                 for (var i = 0; i < sourceInfos.length; i++) {
@@ -75,7 +73,11 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                 navigator.getUserMedia({ video: desiredDevice }, function(stream) {
                     isCapturing = true;
                     localStream = stream;
-                    videoTag.src = window.URL.createObjectURL(stream);
+                    if ("srcObject" in videoTag) {
+                        videoTag.srcObject = stream;
+                    } else {
+                        videoTag.src = window.URL.createObjectURL(stream);
+                    }
                     if (stream) {
                         videoFlow.startCapture(videoTag);
                         videoFlow.onCalculated(gotFlow);
@@ -96,7 +98,11 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                     navigator.getUserMedia({ video: desiredDevice }, function(stream) {
                         isCapturing = true;
                         localStream = stream;
-                        videoTag.src = window.URL.createObjectURL(stream);
+                        if ("srcObject" in videoTag) {
+                            videoTag.srcObject = stream;
+                        } else {
+                            videoTag.src = window.URL.createObjectURL(stream);
+                        }
                         if (stream) {
                             videoFlow.startCapture(videoTag);
                             videoFlow.onCalculated(gotFlow);
