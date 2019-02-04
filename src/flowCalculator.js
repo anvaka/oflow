@@ -50,18 +50,18 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
 
             if (delta !== 0) {
                 /* system is not singular - solving by Kramer method */
-                var Idelta = step / delta;
+                var iDelta = step / delta;
                 var deltaX = -(C1 * A1B2 - C2 * B1);
                 var deltaY = -(A1B2 * C2 - A2 * C1);
 
-                u = deltaX * Idelta;
-                v = deltaY * Idelta;
+                u = deltaX * iDelta;
+                v = deltaY * iDelta;
             } else {
                 /* singular system - find optical flow in gradient direction */
                 var norm = (A1B2 + A2) * (A1B2 + A2) + (B1 + A1B2) * (B1 + A1B2);
                 if (norm !== 0) {
-                    var IGradNorm = step / norm;
-                    var temp = -(C1 + C2) * IGradNorm;
+                    var iGradNorm = step / norm;
+                    var temp = -(C1 + C2) * iGradNorm;
 
                     u = (A1B2 + A2) * temp;
                     v = (B1 + A1B2) * temp;
