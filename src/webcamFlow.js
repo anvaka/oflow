@@ -34,7 +34,8 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
         isCapturing,
         localStream,
         calculatedCallbacks = [],
-        flowCalculatedCallback,
+        selectedVideoSource,
+        desiredDevice,
         videoFlow,
         onWebCamFail = function onWebCamFail(e) {
             if(e.code === 1){
@@ -54,9 +55,6 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
             videoTag.setAttribute('autoplay', true);
             videoFlow = new VideoFlow(videoTag, zoneSize);
         }
-
-
-        
 
         if (window.MediaStreamTrack.getSources) {
             window.MediaStreamTrack.getSources(function(sourceInfos) {
