@@ -1,6 +1,6 @@
 {
   "name": "oflow",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Simple optical flow detection based on Lucas-Kande method",
   "main": "./src/main.js",
   "repository": {
