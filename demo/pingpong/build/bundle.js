@@ -620,18 +620,18 @@ FlowCalculator.prototype.calculate = function (oldImage, newImage, width, height
 
             if (delta !== 0) {
                 /* system is not singular - solving by Kramer method */
-                var Idelta = step / delta;
+                var iDelta = step / delta;
                 var deltaX = -(C1 * A1B2 - C2 * B1);
                 var deltaY = -(A1B2 * C2 - A2 * C1);
 
-                u = deltaX * Idelta;
-                v = deltaY * Idelta;
+                u = deltaX * iDelta;
+                v = deltaY * iDelta;
             } else {
                 /* singular system - find optical flow in gradient direction */
                 var norm = (A1B2 + A2) * (A1B2 + A2) + (B1 + A1B2) * (B1 + A1B2);
                 if (norm !== 0) {
-                    var IGradNorm = step / norm;
-                    var temp = -(C1 + C2) * IGradNorm;
+                    var iGradNorm = step / norm;
+                    var temp = -(C1 + C2) * iGradNorm;
 
                     u = (A1B2 + A2) * temp;
                     v = (B1 + A1B2) * temp;
@@ -814,18 +814,36 @@ module.exports = WebCamFlow;
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
+function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing, onFail) {
     var videoTag,
         isCapturing,
         localStream,
         calculatedCallbacks = [],
-        flowCalculatedCallback,
+        selectedVideoSource,
+        desiredDevice,
         videoFlow,
-        onWebCamFail = function onWebCamFail(e) {
-            if(e.code === 1){
-                window.alert('You have denied access to your camera. I cannot do anything.');
+        onWebCamFail = function(e) {
+            if(e.name === "NotAllowedError"){
+                window.alert('You have denied access to your camera.');
             } else {
                 window.alert('getUserMedia() is not supported in your browser.');
+            }
+            if (onFail) {
+                onFail();
+            }
+        },
+        onWebCamSucceed = function(stream) {
+            isCapturing = true;
+            localStream = stream;
+            if ("srcObject" in videoTag) {
+                videoTag.srcObject = stream;
+            } else {
+                videoTag.src = window.URL.createObjectURL(stream);
+            }
+            if (stream) {
+                videoTag.play();
+                videoFlow.startCapture(videoTag);
+                videoFlow.onCalculated(gotFlow);
             }
         },
         gotFlow = function(direction) {
@@ -840,9 +858,6 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
             videoFlow = new VideoFlow(videoTag, zoneSize);
         }
 
-
-        
-
         if (window.MediaStreamTrack.getSources) {
             window.MediaStreamTrack.getSources(function(sourceInfos) {
                 for (var i = 0; i < sourceInfos.length; i++) {
@@ -856,20 +871,9 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                 }
 
                 desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
-
-                navigator.getUserMedia({ video: desiredDevice }, function(stream) {
-                    isCapturing = true;
-                    localStream = stream;
-                    if ("srcObject" in videoTag) {
-                        videoTag.srcObject = stream;
-                    } else {
-                        videoTag.src = window.URL.createObjectURL(stream);
-                    }
-                    if (stream) {
-                        videoFlow.startCapture(videoTag);
-                        videoFlow.onCalculated(gotFlow);
-                    }
-                }, onWebCamFail);
+                navigator.mediaDevices.getUserMedia({ video: desiredDevice })
+                    .then(onWebCamSucceed)
+                    .catch(onWebCamFail);
             });
         } else if(navigator.mediaDevices.enumerateDevices) {
             navigator.mediaDevices.enumerateDevices().then(
@@ -881,33 +885,12 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                     }
                     
                     desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
-
-                    navigator.getUserMedia({ video: desiredDevice }, function(stream) {
-                        isCapturing = true;
-                        localStream = stream;
-                        if ("srcObject" in videoTag) {
-                            videoTag.srcObject = stream;
-                        } else {
-                            videoTag.src = window.URL.createObjectURL(stream);
-                        }
-                        if (stream) {
-                            videoFlow.startCapture(videoTag);
-                            videoFlow.onCalculated(gotFlow);
-                        }
-                    }, onWebCamFail);
+                    navigator.mediaDevices.getUserMedia({ video: desiredDevice })
+                        .then(onWebCamSucceed)
+                        .catch(onWebCamFail);
                 }
             );
         }
-
-
-
-    };
-
-    if (!navigator.getUserMedia) {
-        navigator.getUserMedia = navigator.getUserMedia ||
-                                 navigator.webkitGetUserMedia ||
-                                 navigator.mozGetUserMedia ||
-                                 navigator.msGetUserMedia;
     }
 
     // our public API
