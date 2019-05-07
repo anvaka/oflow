@@ -29,7 +29,7 @@ module.exports = WebCamFlow;
  *  // once you are done capturing call
  *  flow.stopCapture();
  */
-function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
+function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing, onFail) {
     var videoTag,
         isCapturing,
         localStream,
@@ -37,11 +37,28 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
         selectedVideoSource,
         desiredDevice,
         videoFlow,
-        onWebCamFail = function onWebCamFail(e) {
-            if(e.code === 1){
-                window.alert('You have denied access to your camera. I cannot do anything.');
+        onWebCamFail = function(e) {
+            if(e.name === "NotAllowedError"){
+                window.alert('You have denied access to your camera.');
             } else {
                 window.alert('getUserMedia() is not supported in your browser.');
+            }
+            if (onFail) {
+                onFail();
+            }
+        },
+        onWebCamSucceed = function(stream) {
+            isCapturing = true;
+            localStream = stream;
+            if ("srcObject" in videoTag) {
+                videoTag.srcObject = stream;
+            } else {
+                videoTag.src = window.URL.createObjectURL(stream);
+            }
+            if (stream) {
+                videoTag.play();
+                videoFlow.startCapture(videoTag);
+                videoFlow.onCalculated(gotFlow);
             }
         },
         gotFlow = function(direction) {
@@ -69,20 +86,9 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                 }
 
                 desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
-
-                navigator.getUserMedia({ video: desiredDevice }, function(stream) {
-                    isCapturing = true;
-                    localStream = stream;
-                    if ("srcObject" in videoTag) {
-                        videoTag.srcObject = stream;
-                    } else {
-                        videoTag.src = window.URL.createObjectURL(stream);
-                    }
-                    if (stream) {
-                        videoFlow.startCapture(videoTag);
-                        videoFlow.onCalculated(gotFlow);
-                    }
-                }, onWebCamFail);
+                navigator.mediaDevices.getUserMedia({ video: desiredDevice })
+                    .then(onWebCamSucceed)
+                    .catch(onWebCamFail);
             });
         } else if(navigator.mediaDevices.enumerateDevices) {
             navigator.mediaDevices.enumerateDevices().then(
@@ -94,33 +100,12 @@ function WebCamFlow(defaultVideoTag, zoneSize, cameraFacing) {
                     }
                     
                     desiredDevice = { optional: [{sourceId: selectedVideoSource}] };
-
-                    navigator.getUserMedia({ video: desiredDevice }, function(stream) {
-                        isCapturing = true;
-                        localStream = stream;
-                        if ("srcObject" in videoTag) {
-                            videoTag.srcObject = stream;
-                        } else {
-                            videoTag.src = window.URL.createObjectURL(stream);
-                        }
-                        if (stream) {
-                            videoFlow.startCapture(videoTag);
-                            videoFlow.onCalculated(gotFlow);
-                        }
-                    }, onWebCamFail);
+                    navigator.mediaDevices.getUserMedia({ video: desiredDevice })
+                        .then(onWebCamSucceed)
+                        .catch(onWebCamFail);
                 }
             );
         }
-
-
-
-    };
-
-    if (!navigator.getUserMedia) {
-        navigator.getUserMedia = navigator.getUserMedia ||
-                                 navigator.webkitGetUserMedia ||
-                                 navigator.mozGetUserMedia ||
-                                 navigator.msGetUserMedia;
     }
 
     // our public API
