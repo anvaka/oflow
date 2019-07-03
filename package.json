@@ -16,6 +16,6 @@
     "demo": "browserify demo/pingpong/src/main.js > demo/pingpong/build/bundle.js"
   },
   "devDependencies": {
-    "browserify": "^13.0.1"
+    "browserify": "^16.2.3"
   }
 }
